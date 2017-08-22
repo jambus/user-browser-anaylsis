@@ -20,7 +20,7 @@ def analyze(results):
     prompt = input("[.] Type <c> to print or <p> to plot\n[>] ")
 
     if prompt == "c":
-        for site, count in sites_count_sorted.items():
+        for site, count in results.items():
             print (site, count)
     elif prompt == "p":
         plt.bar(range(len(results)), results.values(), align='edge')
@@ -50,7 +50,7 @@ def loadBrowserHistory():
 		data_path = os.path.expanduser('~')+'\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
 	else:
 		print ('Unsupported OS type, exit...')
-		exit(0)
+		quit()
 
 	files = os.listdir(data_path)
 	history_db = os.path.join(data_path, 'history')
@@ -67,16 +67,18 @@ def loadBrowserHistory():
 
 	return results
 
+def convertHistoryRecordsToDict(results):
+	sites_count = {} #dict makes iterations easier :D
+
+	for url, count in results:
+	    url = parse(url)
+	    if url in sites_count:
+	        sites_count[url] += 1
+	    else:
+	        sites_count[url] = 1
+
+	sites_count_sorted = OrderedDict(sorted(sites_count.items(), key=operator.itemgetter(1), reverse=True))
+	return sites_count_sorted
+
 results = loadBrowserHistory()
-sites_count = {} #dict makes iterations easier :D
-
-for url, count in results:
-    url = parse(url)
-    if url in sites_count:
-        sites_count[url] += 1
-    else:
-        sites_count[url] = 1
-
-sites_count_sorted = OrderedDict(sorted(sites_count.items(), key=operator.itemgetter(1), reverse=True))
-
-analyze (sites_count_sorted)
+analyze (convertHistoryRecordsToDict(results))
